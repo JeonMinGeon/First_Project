@@ -52,7 +52,9 @@ def main():
         avg_diff_abs = np.abs(avg_diff).astype(np.float64)
 
         ##### make mask by applying threshold
-        avg_frame_diff = np.where(avg_diff_abs > 10, 1.0, 0.0)
+        avg_frame_diff_max_thres = np.where(avg_diff_abs > 70, 0.5, -0.5)
+        avg_frame_diff_min_thres = np.where(avg_diff_abs > 5, 0.5, -0.5)
+        avg_frame_diff = avg_frame_diff_max_thres + avg_frame_diff_min_thres
 
         ##### apply mask to current frame
         avg_current_gray_masked = np.multiply(frame_current_gray, avg_frame_diff)
@@ -60,7 +62,7 @@ def main():
 
         ##### final result
         avg_result = avg_current_gray_masked_mk2.astype(np.uint8)
-        
+        cv.imshow('avg_result', avg_result)
 
         ##### make result file
         ##### Please don't modify path
@@ -92,7 +94,7 @@ def main():
 
         ##### final result
         result = current_gray_masked_mk2.astype(np.uint8)
-        cv.imshow('result', result)
+        # cv.imshow('result', result)
 
         ##### renew background
         frame_prev_gray = frame_current_gray
