@@ -16,8 +16,9 @@ def main():
     input_path = './input_image'    # input path
     gt_path = './groundtruth'       # groundtruth path
     result_path = './result'        # result path
-    avg_path = './average'          #average_path
-    ncp_path = './NCP'
+    avg_path = './average'          # average_path
+    ncp_path = './NCP'              # ncp path
+    mtg_path = './MTG'              # mtg path
     basic_path = './'
 
     ##### load input
@@ -41,7 +42,8 @@ def main():
     cv.imwrite(os.path.join(basic_path, 'average.png'), frame_gray_avg)
     ###Will STD(standard deviation) help it???
 
-    
+    46~221
+
     #************minus average**************#
 
     for image_idx in range(len(input)):
@@ -54,7 +56,7 @@ def main():
         avg_diff_abs = np.abs(avg_diff).astype(np.float64)
 
         ##### make mask by applying threshold
-        avg_frame_diff = np.where(avg_diff_abs > 40, 0.5, -0.5)
+        avg_frame_diff = np.where(avg_diff_abs > 40, 1.0, 0.0)
 
         ##### apply mask to current frame
         avg_current_gray_masked = np.multiply(frame_current_gray, avg_frame_diff)
@@ -88,7 +90,7 @@ def main():
 
     diff_CP = ncp_frame_current_gray - ncp_frame_prev_gray
     diff_CP_abs = np.abs(diff_CP).astype(np.float64)
-    ncp_frame_diff = np.where(diff_CP_abs > 60, 0.1, -0.2)
+    ncp_frame_diff = np.where(diff_CP_abs > 50, 0.1, -0.2)
     ncp_current_gray_masked = np.multiply(ncp_frame_current_gray, ncp_frame_diff)
     ncp_current_gray_masked_mk2 = np.where(ncp_current_gray_masked > 0, 255.0, 0.0)
     ncp_result = ncp_current_gray_masked_mk2.astype(np.uint8)
@@ -109,12 +111,16 @@ def main():
             diff_abs *= 2
 
         ##### make mask by applying threshold
+        # ncp_frame_diff_CP = np.where(diff_CP_abs > 5, 0.1, -0.2)
+        # ncp_frame_diff_NC = np.where(diff_NC_abs > 50, 0.1, -0.2)
+
+        
+        # ncp_frame_diff = ncp_frame_diff_CP + ncp_frame_diff_NC
         ncp_frame_diff = np.where(diff_abs > 35, 0.1, -0.2)
 
         ##### apply mask to current frame
         ncp_current_gray_masked = np.multiply(ncp_frame_current_gray, ncp_frame_diff)
         ncp_current_gray_masked_mk2 = np.where(ncp_current_gray_masked > 0, 255.0, 0.0)
-
         ##### final result
         ncp_result = ncp_current_gray_masked_mk2.astype(np.uint8)
         # cv.imshow('ncp_result', ncp_result)
@@ -175,7 +181,7 @@ def main():
         ##### make mask by applying threshold
         # frame_diff = np.where(diff_abs > threshold, 1.0, 0.0)
 
-        frame_diff = np.where(diff_abs > 10, 0.1, -0.2)
+        frame_diff = np.where(diff_abs > 65, 1.0, 0.0)
         
 
         ### Yeah I'm an idiot, 
@@ -211,6 +217,90 @@ def main():
     ##### evaluation result
     print("Basic Baseline")
     eval.cal_result(gt_path, result_path)
+    print("")
+
+    # #**********************MinTheGap***************************#
+    # MTG_frame_current = cv.imread(os.path.join(input_path, input[0]))
+    # MTG_frame_current_gray = cv.cvtColor(MTG_frame_current, cv.COLOR_BGR2GRAY).astype(np.float64)
+    # MTG_frame_prev_gray = MTG_frame_current_gray
+
+    # ##### background substraction
+    # for image_idx in range(len(input)):
+
+    #     ##### calculate foreground region
+    #     MTG_diff = MTG_frame_current_gray - MTG_frame_prev_gray
+    #     MTG_diff_abs = np.abs(MTG_diff).astype(np.float64)
+
+    #     ##### make mask by applying threshold
+    #     # frame_diff = np.where(diff_abs > threshold, 1.0, 0.0)
+
+    #     MTG_frame_diff = np.where(MTG_diff_abs > 75, 1.0, 0.0)
+        
+
+    #     ### Yeah I'm an idiot, 
+
+    #     ##### apply mask to current frame
+    #     MTG_current_gray_masked = np.multiply(MTG_frame_current_gray, MTG_frame_diff)
+    #     MTG_current_gray_masked_mk2 = np.where(MTG_current_gray_masked > 0, 255.0, 0.0)
+    #     # print("len(MTG_current_gray_masked_mk2)")
+    #     # print(len(MTG_current_gray_masked_mk2))
+    #     # print("")
+    #     for i in range(len(MTG_current_gray_masked_mk2)):
+    #         tmp_indexes=[]
+    #         if list(MTG_current_gray_masked_mk2[i]).count(255.0) > 0:
+    #             # print("index")
+    #             # print(i)
+    #             # print("")
+    #             # print("list(MTG_current_gray_masked_mk2[i]).count(255.0)")
+    #             # print(list(MTG_current_gray_masked_mk2[i]).count(255.0))
+    #             # print("")
+
+    #             tmp_mk2_list = MTG_current_gray_masked_mk2[i]
+    #             for j in range(list(MTG_current_gray_masked_mk2[i]).count(255.0)):
+    #                 tmpInd = list(tmp_mk2_list).index(255.0)
+    #                 tmp_indexes.append(tmpInd)
+    #                 tmp_mk2_list = MTG_current_gray_masked_mk2[i][tmpInd+1:]
+    #             for k in range(1,len(tmp_indexes)):
+    #                 if tmp_indexes[k] - tmp_indexes[k-1] < (len(MTG_current_gray_masked_mk2[i])/10):
+    #                     if tmp_indexes[k] - tmp_indexes[k-1] != 1:
+    #                         for l in range(tmp_indexes[k-1],tmp_indexes[k]):
+    #                             MTG_current_gray_masked_mk2[i][l] = 255.0
+        
+
+    #     # print("MTG_current_gray_masked_mk2")
+    #     # print(MTG_current_gray_masked_mk2)
+    #     # print("")
+
+        
+
+    #     ##### final result
+    #     MTG_result = MTG_current_gray_masked_mk2.astype(np.uint8)
+    #     # cv.imshow('result', result)
+
+    #     ##### renew background
+    #     MTG_frame_prev_gray = MTG_frame_current_gray
+
+    #     ##### make result file
+    #     ##### Please don't modify path
+    #     cv.imwrite(os.path.join(mtg_path, 'mtg_result%06d.png' % (image_idx + 1)), MTG_result)
+
+    #     ##### end of input
+    #     if image_idx == len(input) - 1:
+    #         break
+
+    #     ##### read next frame
+    #     MTG_frame_current = cv.imread(os.path.join(input_path, input[image_idx + 1]))
+    #     MTG_frame_current_gray = cv.cvtColor(MTG_frame_current, cv.COLOR_BGR2GRAY).astype(np.float64)
+
+    #     ##### If you want to stop, press ESC key
+    #     k = cv.waitKey(30) & 0xff
+    #     if k == 27:
+    #         break
+
+    # ##### evaluation result
+    # print("Mind The Gap")
+    # eval.cal_result(gt_path, mtg_path)
+    # print("")
 
 if __name__ == '__main__':
     main()
